@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../services/api';
+import axios from 'axios';
 
 const AuthContext = createContext(null);
 
@@ -26,20 +27,17 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
+
+    const API_URL = import.meta.env.VITE_API_URL;
+
     const login = async (email, password) => {
         try {
-            const response = await authAPI.login({ email, password });
-            const { token, ...userData } = response.data.data;
-
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(userData));
-            setUser(userData);
-
-            return { success: true, user: userData };
-        } catch (error) {
+            const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
+            return response.data;
+        } catch (err) {
             return {
                 success: false,
-                message: error.response?.data?.message || 'Login failed',
+                message: err.response?.data?.message || 'Login failed',
             };
         }
     };
